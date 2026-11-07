@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dining Room Board">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Dining Room Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: landscape tablet. Header strip on top, weather on the left, Ciara's train board on the right. Stacks to one column on narrow screens. */
+:root {
+  --bg: #eef1f3;
+  --panel: #ffffff;
+  --ink: #15232d;
+  --muted: #5d6f7b;
+  --line: #d5dde2;
+  --accent: #0b6e8a;
+  --rain: #2b6cb0;
+  --warn: #b4531a;
+  --good: #2f7d4f;
+  --board: #0e1b22;
+  --board-ink: #ffc857;
+  --board-dim: #8fa3ad;
+  --board-line: #25363f;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Barlow", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1419; --panel: #142129; --ink: #e8eff3; --muted: #93a6b2; --line: #263944;
+    --accent: #4fb6d3; --rain: #7fb2ea; --warn: #f0a066; --good: #6cc48f;
+    --board: #070e12; --board-line: #1d2c34;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1419; --panel: #142129; --ink: #e8eff3; --muted: #93a6b2; --line: #263944;
+  --accent: #4fb6d3; --rain: #7fb2ea; --warn: #f0a066; --good: #6cc48f;
+  --board: #070e12; --board-line: #1d2c34;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  padding-block: max(18px, env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(22px, env(safe-area-inset-left, 0px));
+  padding-right: max(22px, env(safe-area-inset-right, 0px));
+  -webkit-text-size-adjust: 100%;
+}
+.num { font-variant-numeric: tabular-nums; }
+
+.board {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px;
+}
+
+/* Header */
+.top {
+  grid-column: 1 / -1;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.clock { font-family: var(--display); font-weight: 600; font-size: 84px; line-height: 0.95; letter-spacing: -0.5px; }
+.date { font-family: var(--display); font-weight: 500; font-size: 34px; color: var(--muted); }
+
+/* Weather panel */
+.weather {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 22px 26px; display: flex; flex-direction: column; gap: 18px; min-height: 0; min-width: 0;
+}
+.now { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.temp { font-family: var(--display); font-weight: 600; font-size: 150px; line-height: 0.85; }
+.temp small { font-size: 0.4em; vertical-align: top; font-weight: 500; color: var(--muted); }
+.cond { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cond .what { font-family: var(--display); font-weight: 600; font-size: 42px; line-height: 1; }
+.cond .sub { color: var(--muted); font-size: 21px; }
+.facts { display: flex; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: 19px; }
+.facts b { color: var(--ink); font-weight: 600; }
+
+.rain-line {
+  border-left: 5px solid var(--rain); padding: 4px 0 4px 14px;
+  font-size: 24px; font-weight: 500;
+}
+.rain-line.dry { border-left-color: var(--good); }
+
+.bike {
+  background: var(--bg); border-radius: 10px; padding: 14px 18px; display: grid; gap: 4px;
+}
+.bike .label { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.bike .call { font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1.05; }
+.bike .call.ok { color: var(--good); }
+.bike .call.caution { color: var(--warn); }
+.bike .wear { font-size: 20px; color: var(--ink); }
+
+.hours { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin-top: auto; }
+.hour { border-top: 3px solid var(--line); padding-top: 8px; display: grid; gap: 2px; text-align: center; }
+.hour .h { color: var(--muted); font-size: 17px; font-weight: 500; }
+.hour .t { font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1; }
+.hour .p { font-size: 17px; color: var(--rain); font-weight: 600; min-height: 1.2em; }
+.hour.wet { border-top-color: var(--rain); }
+
+.sun { display: flex; gap: 22px; color: var(--muted); font-size: 18px; flex-wrap: wrap; }
+.sun b { color: var(--ink); font-weight: 600; }
+.status { color: var(--muted); font-size: 15px; }
+.status.err { color: var(--warn); }
+
+/* Train board: a departure board look, constant dark in both themes */
+.trains {
+  background: var(--board); color: var(--board-ink); border-radius: 14px; padding: 22px 26px;
+  display: flex; flex-direction: column; gap: 14px; min-height: 0; min-width: 0;
+}
+.trains h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1.05; color: #f4f7f9; }
+.trains .route { color: var(--board-dim); font-size: 18px; margin-top: 2px; }
+.dep { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: baseline; border-top: 1px solid var(--board-line); padding-top: 12px; }
+.dep .at { font-family: var(--display); font-weight: 600; font-size: 52px; line-height: 1; }
+.dep .in { font-family: var(--display); font-weight: 600; font-size: 40px; line-height: 1; text-align: right; }
+.dep .meta { grid-column: 1 / -1; color: var(--board-dim); font-size: 17px; }
+.dep.first .at { font-size: 76px; }
+.dep.first .in { font-size: 56px; }
+.dep.soon .in { color: #ff8a65; }
+.empty { color: var(--board-dim); font-size: 20px; line-height: 1.4; border-top: 1px solid var(--board-line); padding-top: 14px; }
+.trains .foot { margin-top: auto; color: var(--board-dim); font-size: 15px; }
+
+.trains iframe { flex: 1; min-height: 260px; width: 100%; border: 0; border-radius: 8px; background: #eeeeee; }
+.trains .foot a { color: var(--board-ink); }
+
+@media (max-width: 820px) {
+  html, body { height: auto; }
+  .board { height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; }
+  .clock { font-size: 60px; }
+  .temp { font-size: 110px; }
+  .hours { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="board">
+  <header class="top">
+    <div class="clock num" id="clock">--:--</div>
+    <div class="date" id="date"></div>
+  </header>
+
+  <section class="weather" aria-label="Weather">
+    <div class="now">
+      <div class="temp num" id="temp">--<small>°F</small></div>
+      <div class="cond">
+        <div class="what" id="what">Loading weather</div>
+        <div class="sub num" id="feels"></div>
+        <div class="facts num" id="facts"></div>
+      </div>
+    </div>
+
+    <div class="rain-line dry" id="rain">Checking the next 12 hours</div>
+
+    <div class="bike" aria-label="Bike commute">
+      <div class="label">Bike to campus</div>
+      <div class="call" id="bikeCall">--</div>
+      <div class="wear" id="bikeWear"></div>
+    </div>
+
+    <div class="hours" id="hours" aria-label="Next hours"></div>
+
+    <div class="sun num" id="sun"></div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="trains" aria-label="Metra Electric">
+    <div>
+      <h2>Metra Electric, northbound</h2>
+      <div class="route">59th Street to 51st-53rd Street (Hyde Park)</div>
+    </div>
+    <iframe id="tracker" title="Live Metra Electric arrivals at 59th Street" referrerpolicy="no-referrer" hidden></iframe>
+    <div id="deps"></div>
+    <div class="foot" id="trainFoot"></div>
+  </section>
+</main>
+
+<script>
+/* ---------------------------------------------------------------
+   SETTINGS
+   --------------------------------------------------------------- */
+// Hyde Park, Chicago. The forecast is for this point.
+const LAT = 41.79, LON = -87.59;
+const REFRESH_MINUTES = 15;
+
+// Metra Electric schedule, northbound (inbound toward Millennium Station).
+// Times are "HH:MM" in 24-hour form. "arr" (arrival at 51st-53rd) is optional.
+// Fill these in from the current timetable on metra.com. Example row:
+//   { dep: "07:12", arr: "07:15" }
+// Left empty on purpose, so the board never shows a made-up train.
+const TRAINS = {
+  weekday: [],
+  saturday: [],
+  sunday: []
+};
+// Holidays are not handled. Check metra.com on those days.
+
+// Live predictions from Metra Tracker: 59th Street, Metra Electric inbound.
+// With EMBED_TRACKER on, the right-hand panel shows that page instead of the
+// schedule list above. If the panel stays blank, the site refuses to be embedded:
+// set EMBED_TRACKER to false to use the schedule list, or open the link in the panel footer.
+const TRACKER_URL = "https://metratracker.com/predictions/bustime:ME/INBOUND/59TH-UP/51ST-53RD";
+const EMBED_TRACKER = true;
+
+/* ---------------------------------------------------------------
+   HELPERS
+   --------------------------------------------------------------- */
+const $ = (id) => document.getElementById(id);
+const fmtTime = (d) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const fmtHour = (d) => d.toLocaleTimeString([], { hour: "numeric" });
+const round = (x) => Math.round(x);
+
+const WEATHER = {
+  0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
+  45: "Fog", 48: "Freezing fog",
+  51: "Light drizzle", 53: "Drizzle", 55: "Heavy drizzle", 56: "Freezing drizzle", 57: "Freezing drizzle",
+  61: "Light rain", 63: "Rain", 65: "Heavy rain", 66: "Freezing rain", 67: "Freezing rain",
+  71: "Light snow", 73: "Snow", 75: "Heavy snow", 77: "Snow grains",
+  80: "Rain showers", 81: "Rain showers", 82: "Heavy showers",
+  85: "Snow showers", 86: "Heavy snow showers",
+  95: "Thunderstorm", 96: "Thunderstorm, hail", 99: "Thunderstorm, hail"
+};
+const isSnow = (c) => [71, 73, 75, 77, 85, 86].includes(c);
+const isIcy = (c) => [56, 57, 66, 67].includes(c);
+
+/* ---------------------------------------------------------------
+   CLOCK
+   --------------------------------------------------------------- */
+function tickClock() {
+  const now = new Date();
+  $("clock").textContent = fmtTime(now);
+  $("date").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+  renderTrains(now);
+}
+
+/* ---------------------------------------------------------------
+   TRAINS
+   --------------------------------------------------------------- */
+function dayType(d) {
+  const w = d.getDay();
+  return w === 0 ? "sunday" : w === 6 ? "saturday" : "weekday";
+}
+function atToday(hhmm, base) {
+  const [h, m] = hhmm.split(":").map(Number);
+  const d = new Date(base);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+function setupTracker() {
+  const frame = $("tracker");
+  const foot = $("trainFoot");
+  frame.src = TRACKER_URL;
+  frame.hidden = false;
+  $("deps").hidden = true;
+  foot.textContent = "";
+  const a = document.createElement("a");
+  a.href = TRACKER_URL;
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.textContent = "Open the live tracker in its own tab";
+  foot.appendChild(a);
+}
+function renderTrains(now) {
+  if (EMBED_TRACKER) return;
+  const box = $("deps");
+  const type = dayType(now);
+  const list = TRAINS[type] || [];
+  const foot = $("trainFoot");
+  box.textContent = "";
+
+  if (!list.length) {
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.textContent = "Train times are not loaded for " + type + "s yet. Add them to the TRAINS list at the top of the script.";
+    box.appendChild(e);
+    foot.textContent = "Live tracker: metra.com";
+    return;
+  }
+
+  const upcoming = list
+    .map((t) => ({ dep: atToday(t.dep, now), arr: t.arr ? atToday(t.arr, now) : null }))
+    .filter((t) => t.dep > now)
+    .sort((a, b) => a.dep - b.dep)
+    .slice(0, 4);
+
+  if (!upcoming.length) {
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.textContent = "No more northbound trains today.";
+    box.appendChild(e);
+    foot.textContent = "Schedule times, not live. Check metra.com for delays.";
+    return;
+  }
+
+  upcoming.forEach((t, i) => {
+    const mins = Math.max(0, Math.ceil((t.dep - now) / 60000));
+    const row = document.createElement("div");
+    row.className = "dep" + (i === 0 ? " first" : "") + (mins <= 8 ? " soon" : "");
+    const at = document.createElement("div");
+    at.className = "at num";
+    at.textContent = fmtTime(t.dep);
+    const inn = document.createElement("div");
+    inn.className = "in num";
+    inn.textContent = mins < 60 ? mins + " min" : Math.floor(mins / 60) + " h " + (mins % 60) + " min";
+    row.append(at, inn);
+    if (t.arr) {
+      const meta = document.createElement("div");
+      meta.className = "meta num";
+      meta.textContent = "Arrives 51st-53rd " + fmtTime(t.arr);
+      row.appendChild(meta);
+    }
+    box.appendChild(row);
+  });
+  foot.textContent = "Schedule times, not live. Check metra.com for delays.";
+}
+
+/* ---------------------------------------------------------------
+   WEATHER
+   --------------------------------------------------------------- */
+let lastGood = null;
+
+async function loadWeather() {
+  const url = "https://api.open-meteo.com/v1/forecast" +
+    "?latitude=" + LAT + "&longitude=" + LON +
+    "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m" +
+    "&hourly=temperature_2m,precipitation_probability,weather_code,apparent_temperature,wind_gusts_10m" +
+    "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset" +
+    "&temperature_unit=fahrenheit&wind_speed_unit=mph" +
+    "&timezone=America%2FChicago&forecast_days=2";
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    lastGood = { data, at: new Date() };
+    renderWeather(data);
+    setStatus("Updated " + fmtTime(lastGood.at) + ". Forecast from Open-Meteo.", false);
+  } catch (err) {
+    if (lastGood) {
+      setStatus("Weather is offline. Showing data from " + fmtTime(lastGood.at) + ".", true);
+    } else {
+      $("what").textContent = "Weather unavailable";
+      setStatus("Could not reach the forecast service. Check the Wi-Fi connection. Retrying soon.", true);
+    }
+  }
+}
+function setStatus(text, isErr) {
+  const s = $("status");
+  s.textContent = text;
+  s.className = "status" + (isErr ? " err" : "");
+}
+
+function renderWeather(d) {
+  const cur = d.current;
+  const code = cur.weather_code;
+  $("temp").innerHTML = round(cur.temperature_2m) + "<small>°F</small>";
+  $("what").textContent = WEATHER[code] || "Weather";
+  $("feels").textContent = "Feels like " + round(cur.apparent_temperature) + "°  ·  High " +
+    round(d.daily.temperature_2m_max[0]) + "°  ·  Low " + round(d.daily.temperature_2m_min[0]) + "°";
+  const gust = round(cur.wind_gusts_10m);
+  $("facts").innerHTML = "";
+  const f1 = document.createElement("span");
+  f1.append("Wind ");
+  const b1 = document.createElement("b"); b1.textContent = round(cur.wind_speed_10m) + " mph"; f1.appendChild(b1);
+  f1.append(" (gusts " + gust + ")");
+  const f2 = document.createElement("span");
+  f2.append("Humidity ");
+  const b2 = document.createElement("b"); b2.textContent = round(cur.relative_humidity_2m) + "%"; f2.appendChild(b2);
+  $("facts").append(f1, f2);
+
+  // Find the current hour in the hourly arrays (API times are local, like "2026-11-07T14:00").
+  const hourKey = cur.time.slice(0, 13);
+  let i0 = d.hourly.time.findIndex((t) => t.slice(0, 13) === hourKey);
+  if (i0 < 0) i0 = 0;
+  const idx = (n) => Array.from({ length: n }, (_, k) => i0 + k).filter((i) => i < d.hourly.time.length);
+
+  // Hourly strip: the next 8 hours.
+  const strip = $("hours");
+  strip.textContent = "";
+  idx(8).forEach((i, k) => {
+    const when = new Date(d.hourly.time[i]);
+    const p = d.hourly.precipitation_probability[i];
+    const el = document.createElement("div");
+    el.className = "hour" + (p >= 40 ? " wet" : "");
+    const h = document.createElement("div"); h.className = "h"; h.textContent = k === 0 ? "Now" : fmtHour(when);
+    const t = document.createElement("div"); t.className = "t num"; t.textContent = round(d.hourly.temperature_2m[i]) + "°";
+    const pr = document.createElement("div"); pr.className = "p num"; pr.textContent = p >= 10 ? p + "%" : "";
+    el.append(h, t, pr);
+    strip.appendChild(el);
+  });
+
+  // Rain timing over the next 12 hours.
+  const next12 = idx(12);
+  const wetI = next12.find((i) => d.hourly.precipitation_probability[i] >= 50);
+  const rain = $("rain");
+  if (wetI !== undefined) {
+    const c = d.hourly.weather_code[wetI];
+    const kind = isSnow(c) ? "Snow" : isIcy(c) ? "Freezing rain" : (d.hourly.temperature_2m[wetI] <= 32 ? "Snow or ice" : "Rain");
+    const when = new Date(d.hourly.time[wetI]);
+    const sameHour = wetI === i0;
+    rain.textContent = sameHour ? kind + " likely now" : kind + " likely around " + fmtHour(when);
+    rain.className = "rain-line";
+  } else {
+    const last = new Date(d.hourly.time[next12[next12.length - 1]]);
+    rain.textContent = "No rain or snow expected through " + fmtHour(last);
+    rain.className = "rain-line dry";
+  }
+
+  // Bike call, from the next 3 hours.
+  const n3 = idx(3);
+  const maxP = Math.max(...n3.map((i) => d.hourly.precipitation_probability[i]));
+  const maxGust = Math.max(...n3.map((i) => d.hourly.wind_gusts_10m[i]));
+  const feel = cur.apparent_temperature;
+  const icy = n3.some((i) => isIcy(d.hourly.weather_code[i]) || (d.hourly.temperature_2m[i] <= 32 && d.hourly.precipitation_probability[i] >= 40));
+  const call = $("bikeCall");
+  if (icy || feel <= 5 || maxGust >= 35) {
+    call.textContent = icy ? "Icy. Walk or take the train." : "Rough out there. Consider walking.";
+    call.className = "call caution";
+  } else if (maxP >= 50) {
+    call.textContent = "Bike with rain gear";
+    call.className = "call caution";
+  } else if (feel <= 25 || maxGust >= 25) {
+    call.textContent = "Bike, bundled up";
+    call.className = "call caution";
+  } else {
+    call.textContent = "Good for the bike";
+    call.className = "call ok";
+  }
+  let wear;
+  if (feel >= 70) wear = "Short sleeves are fine.";
+  else if (feel >= 55) wear = "Light jacket.";
+  else if (feel >= 40) wear = "Jacket and light gloves.";
+  else if (feel >= 28) wear = "Winter jacket, warm gloves, ear cover.";
+  else if (feel >= 15) wear = "Insulated layers, face cover, winter gloves.";
+  else wear = "Full winter kit. Cover all skin.";
+  $("bikeWear").textContent = "Feels like " + round(feel) + "°. " + wear;
+
+  // Sunrise and sunset.
+  const sun = $("sun");
+  sun.textContent = "";
+  const mk = (label, iso) => {
+    const s = document.createElement("span");
+    s.append(label + " ");
+    const b = document.createElement("b");
+    b.textContent = fmtTime(new Date(iso));
+    s.appendChild(b);
+    return s;
+  };
+  sun.append(mk("Sunrise", d.daily.sunrise[0]), mk("Sunset", d.daily.sunset[0]));
+}
+
+/* ---------------------------------------------------------------
+   START
+   --------------------------------------------------------------- */
+if (EMBED_TRACKER) setupTracker();
+tickClock();
+setInterval(tickClock, 1000);
+loadWeather();
+setInterval(loadWeather, REFRESH_MINUTES * 60 * 1000);
+
+// Ask the screen to stay on while the page is visible. Safe to ignore if refused.
+async function keepAwake() {
+  try {
+    if ("wakeLock" in navigator) await navigator.wakeLock.request("screen");
+  } catch (e) { /* not available */ }
+}
+keepAwake();
+document.addEventListener("visibilitychange", () => { if (!document.hidden) keepAwake(); });
+</script>
+</body>
+</html>
