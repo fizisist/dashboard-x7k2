@@ -142,6 +142,8 @@ body {
 }
 .live-btn:focus-visible { outline: 3px solid #f4f7f9; outline-offset: 3px; }
 
+.cal-label { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--board-dim); font-weight: 600; }
+.cal-frame { background: #ffffff; }
 .precip { display: grid; gap: 4px; }
 .rain-detail { border-left: 5px solid transparent; padding-left: 14px; color: var(--muted); font-size: 19px; min-height: 1.2em; }
 .sky { display: flex; align-items: center; gap: 12px 28px; flex-wrap: wrap; }
@@ -207,6 +209,8 @@ body {
     <iframe id="tracker" title="Live Metra Electric arrivals at 59th Street" referrerpolicy="no-referrer" hidden></iframe>
     <a id="liveLink" class="live-btn" target="_blank" rel="noopener">Live trains from 59th Street</a>
     <div id="deps"></div>
+    <div class="cal-label" id="calLabel">Coming up</div>
+    <iframe id="cal" class="cal-frame" title="Family calendar, upcoming events"></iframe>
     <div class="foot" id="trainFoot"></div>
   </section>
 </main>
@@ -237,6 +241,9 @@ const TRAINS = {
 // set EMBED_TRACKER to false to use the schedule list, or open the link in the panel footer.
 const TRACKER_URL = "https://metratracker.com/predictions/bustime:ME/INBOUND/59TH-UP/51ST-53RD";
 const EMBED_TRACKER = false; // metratracker.com refuses to be embedded, so this stays false.
+
+// Public family calendar, shown as Google's agenda view. Leave empty to hide the panel.
+const CALENDAR_ID = "ffae8f7a3d8378c970fa8a6a515e05a08f5d8ad6f23a2889b01b3a17e707c886@group.calendar.google.com";
 
 /* ---------------------------------------------------------------
    HELPERS
@@ -307,7 +314,7 @@ function renderTrains(now) {
   if (!list.length) {
     const e = document.createElement("div");
     e.className = "empty";
-    e.textContent = "Tap the button above for live arrivals. A schedule list can be added to the TRAINS list at the top of the script.";
+    e.hidden = true;
     box.appendChild(e);
     foot.textContent = "";
     return;
@@ -613,6 +620,13 @@ function renderWeather(d) {
    START
    --------------------------------------------------------------- */
 $("liveLink").href = TRACKER_URL;
+if (CALENDAR_ID) {
+  $("cal").src = "https://calendar.google.com/calendar/embed?src=" + encodeURIComponent(CALENDAR_ID) +
+    "&mode=AGENDA&ctz=America%2FChicago&showTitle=0&showNav=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0";
+} else {
+  $("cal").hidden = true;
+  $("calLabel").hidden = true;
+}
 renderMoon();
 setInterval(renderMoon, 30 * 60 * 1000);
 if (EMBED_TRACKER) setupTracker();
