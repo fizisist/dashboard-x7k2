@@ -60,7 +60,7 @@ body {
 .num { font-variant-numeric: tabular-nums; }
 
 .board {
-  height: 100%;
+  min-height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
@@ -72,16 +72,16 @@ body {
   grid-column: 1 / -1;
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
-.clock { font-family: var(--display); font-weight: 600; font-size: 84px; line-height: 0.95; letter-spacing: -0.5px; }
+.clock { font-family: var(--display); font-weight: 600; font-size: 68px; line-height: 0.95; letter-spacing: -0.5px; }
 .date { font-family: var(--display); font-weight: 500; font-size: 34px; color: var(--muted); }
 
 /* Weather panel */
 .weather {
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-  padding: 22px 26px; display: flex; flex-direction: column; gap: 18px; min-height: 0; min-width: 0;
+  padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; min-height: 0; min-width: 0;
 }
-.now { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
-.temp { font-family: var(--display); font-weight: 600; font-size: 150px; line-height: 0.85; }
+.now { display: flex; align-items: center; gap: 6px 24px; flex-wrap: wrap; }
+.temp { font-family: var(--display); font-weight: 600; font-size: 112px; line-height: 0.85; }
 .temp small { font-size: 0.4em; vertical-align: top; font-weight: 500; color: var(--muted); }
 .cond { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .cond .what { font-family: var(--display); font-weight: 600; font-size: 42px; line-height: 1; }
@@ -96,7 +96,7 @@ body {
 .rain-line.dry { border-left-color: var(--good); }
 
 .bike {
-  background: var(--bg); border-radius: 10px; padding: 14px 18px; display: grid; gap: 4px;
+  background: var(--bg); border-radius: 10px; padding: 10px 16px; display: grid; gap: 2px;
 }
 .bike .label { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .bike .call { font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1.05; }
@@ -107,7 +107,7 @@ body {
 .hours { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin-top: auto; }
 .hour { border-top: 3px solid var(--line); padding-top: 8px; display: grid; gap: 2px; text-align: center; }
 .hour .h { color: var(--muted); font-size: 17px; font-weight: 500; }
-.hour .t { font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1; }
+.hour .t { font-family: var(--display); font-weight: 600; font-size: 30px; line-height: 1; }
 .hour .p { font-size: 17px; color: var(--rain); font-weight: 600; min-height: 1.2em; }
 .hour.wet { border-top-color: var(--rain); }
 
@@ -135,6 +135,22 @@ body {
 
 .trains iframe { flex: 1; min-height: 260px; width: 100%; border: 0; border-radius: 8px; background: #eeeeee; }
 .trains .foot a { color: var(--board-ink); }
+.live-btn {
+  display: block; text-align: center; text-decoration: none;
+  background: var(--board-ink); color: #15232d; border-radius: 12px;
+  font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1.1; padding: 18px 16px;
+}
+.live-btn:focus-visible { outline: 3px solid #f4f7f9; outline-offset: 3px; }
+
+.precip { display: grid; gap: 4px; }
+.rain-detail { border-left: 5px solid transparent; padding-left: 14px; color: var(--muted); font-size: 19px; min-height: 1.2em; }
+.sky { display: flex; align-items: center; gap: 12px 28px; flex-wrap: wrap; }
+.moon { display: flex; align-items: center; gap: 12px; }
+.moon svg { flex: none; }
+.moon-dark { fill: var(--board); stroke: var(--line); stroke-width: 1; }
+.moon-lit { fill: #f3e7b8; }
+.moon-text { display: grid; gap: 0; font-size: 17px; color: var(--muted); }
+.moon-text b { color: var(--ink); font-size: 20px; font-weight: 600; }
 
 @media (max-width: 820px) {
   html, body { height: auto; }
@@ -163,7 +179,10 @@ body {
       </div>
     </div>
 
-    <div class="rain-line dry" id="rain">Checking the next 12 hours</div>
+    <div class="precip">
+      <div class="rain-line dry" id="rain">Checking the next 24 hours</div>
+      <div class="rain-detail num" id="rainDetail"></div>
+    </div>
 
     <div class="bike" aria-label="Bike commute">
       <div class="label">Bike to campus</div>
@@ -173,7 +192,10 @@ body {
 
     <div class="hours" id="hours" aria-label="Next hours"></div>
 
-    <div class="sun num" id="sun"></div>
+    <div class="sky">
+      <div class="moon" id="moon"></div>
+      <div class="sun num" id="sun"></div>
+    </div>
     <div class="status" id="status"></div>
   </section>
 
@@ -183,6 +205,7 @@ body {
       <div class="route">59th Street to 51st-53rd Street (Hyde Park)</div>
     </div>
     <iframe id="tracker" title="Live Metra Electric arrivals at 59th Street" referrerpolicy="no-referrer" hidden></iframe>
+    <a id="liveLink" class="live-btn" target="_blank" rel="noopener">Live trains from 59th Street</a>
     <div id="deps"></div>
     <div class="foot" id="trainFoot"></div>
   </section>
@@ -213,7 +236,7 @@ const TRAINS = {
 // schedule list above. If the panel stays blank, the site refuses to be embedded:
 // set EMBED_TRACKER to false to use the schedule list, or open the link in the panel footer.
 const TRACKER_URL = "https://metratracker.com/predictions/bustime:ME/INBOUND/59TH-UP/51ST-53RD";
-const EMBED_TRACKER = true;
+const EMBED_TRACKER = false; // metratracker.com refuses to be embedded, so this stays false.
 
 /* ---------------------------------------------------------------
    HELPERS
@@ -284,9 +307,9 @@ function renderTrains(now) {
   if (!list.length) {
     const e = document.createElement("div");
     e.className = "empty";
-    e.textContent = "Train times are not loaded for " + type + "s yet. Add them to the TRAINS list at the top of the script.";
+    e.textContent = "Tap the button above for live arrivals. A schedule list can be added to the TRAINS list at the top of the script.";
     box.appendChild(e);
-    foot.textContent = "Live tracker: metra.com";
+    foot.textContent = "";
     return;
   }
 
@@ -330,15 +353,142 @@ function renderTrains(now) {
 /* ---------------------------------------------------------------
    WEATHER
    --------------------------------------------------------------- */
+/* Rain and snow detail. Amounts are inches. */
+function renderPrecip(d, i0, idx) {
+  const H = d.hourly;
+  const next = idx(24);
+  const amt = (i) => H.precipitation[i] || 0;
+  const wet = (i) => amt(i) >= 0.01;
+  const rain = $("rain");
+  const det = $("rainDetail");
+  const first = next.find(wet);
+
+  if (first === undefined) {
+    const maxP = Math.max(...next.map((i) => H.precipitation_probability[i] || 0));
+    const at = next.find((i) => (H.precipitation_probability[i] || 0) === maxP);
+    rain.textContent = "No rain or snow expected in the next 24 hours";
+    rain.className = "rain-line dry";
+    det.textContent = maxP >= 20 ? "Highest chance " + maxP + "% around " + fmtHour(new Date(H.time[at])) : "";
+    return;
+  }
+
+  // End of the first wet spell. A single dry hour inside it does not end it.
+  const startK = next.indexOf(first);
+  let endK = startK;
+  for (let k = startK; k < next.length; k++) {
+    if (wet(next[k])) endK = k;
+    else if (k + 1 < next.length && wet(next[k + 1])) continue;
+    else break;
+  }
+  const block = next.slice(startK, endK + 1);
+  const snow = block.reduce((s, i) => s + (H.snowfall[i] || 0), 0);
+  const liquid = block.reduce((s, i) => s + (H.rain[i] || 0) + (H.showers[i] || 0), 0);
+  const icy = block.some((i) => isIcy(H.weather_code[i]));
+  let kind;
+  if (icy) kind = "Freezing rain";
+  else if (snow >= 0.1 && liquid >= 0.05) kind = "Rain and snow";
+  else if (snow >= 0.04) kind = "Snow";
+  else if (liquid > 0) kind = "Rain";
+  else kind = H.temperature_2m[first] <= 32 ? "Snow" : "Rain";
+
+  const nowWet = first === i0;
+  const lastHour = new Date(H.time[next[endK]]);
+  const endsAt = new Date(lastHour.getTime() + 3600000);
+  const runsOn = endK === next.length - 1;
+  let head = nowWet ? kind + " now" : kind + " starts around " + fmtHour(new Date(H.time[first]));
+  head += runsOn ? ", continuing into tomorrow" : ", ending around " + fmtHour(endsAt);
+  rain.textContent = head;
+  rain.className = "rain-line";
+
+  const parts = [];
+  const maxP = Math.max(...block.map((i) => H.precipitation_probability[i] || 0));
+  parts.push("Chance up to " + maxP + "%");
+  if (block.length >= 3) {
+    const peak = block.reduce((b, i) => (amt(i) > amt(b) ? i : b), block[0]);
+    parts.push("Heaviest around " + fmtHour(new Date(H.time[peak])));
+  }
+  const amounts = [];
+  if (snow >= 0.1) amounts.push("about " + snow.toFixed(1) + " in of snow");
+  if (liquid >= 0.02) amounts.push("about " + liquid.toFixed(2) + " in of rain");
+  if (amounts.length) parts.push(amounts.join(" and "));
+  else parts.push("only a trace");
+  const later = next.find((i, k) => k > endK + 1 && wet(i));
+  if (later !== undefined) parts.push("more around " + fmtHour(new Date(H.time[later])));
+  det.textContent = parts.join("  ·  ");
+}
+
+/* Moon phase, computed on the device from the mean lunar cycle. Good to within about a day. */
+const SYNODIC = 29.530588853;
+const NEW_MOON_REF = Date.UTC(2000, 0, 6, 18, 14);
+function moonState(date) {
+  const days = (date.getTime() - NEW_MOON_REF) / 86400000;
+  const f = (((days % SYNODIC) + SYNODIC) % SYNODIC) / SYNODIC; // 0 new, 0.5 full
+  return { f, lit: (1 - Math.cos(2 * Math.PI * f)) / 2 };
+}
+function moonName(f) {
+  if (f < 0.03 || f > 0.97) return "New moon";
+  if (f < 0.22) return "Waxing crescent";
+  if (f < 0.28) return "First quarter";
+  if (f < 0.47) return "Waxing gibbous";
+  if (f < 0.53) return "Full moon";
+  if (f < 0.72) return "Waning gibbous";
+  if (f < 0.78) return "Last quarter";
+  return "Waning crescent";
+}
+function nextPhase(date, target) {
+  const { f } = moonState(date);
+  let delta = (target - f + 1) % 1;
+  if (delta < 0.002) delta += 1;
+  return new Date(date.getTime() + delta * SYNODIC * 86400000);
+}
+function moonSvg(f) {
+  const NS = "http://www.w3.org/2000/svg";
+  const r = 20, c = 22;
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 44 44");
+  svg.setAttribute("width", "44");
+  svg.setAttribute("height", "44");
+  svg.setAttribute("aria-hidden", "true");
+  const dark = document.createElementNS(NS, "circle");
+  dark.setAttribute("cx", c); dark.setAttribute("cy", c); dark.setAttribute("r", r);
+  dark.setAttribute("class", "moon-dark");
+  const fw = f < 0.5 ? f : 1 - f;
+  const cosv = Math.cos(2 * Math.PI * fw);
+  const rx = r * Math.abs(cosv);
+  const sweep = cosv > 0 ? 0 : 1;
+  const lit = document.createElementNS(NS, "path");
+  lit.setAttribute("d", "M " + c + " " + (c - r) + " A " + r + " " + r + " 0 0 1 " + c + " " + (c + r) +
+    " A " + rx + " " + r + " 0 0 " + sweep + " " + c + " " + (c - r) + " Z");
+  lit.setAttribute("class", "moon-lit");
+  if (f >= 0.5) lit.setAttribute("transform", "translate(" + (2 * c) + " 0) scale(-1 1)");
+  svg.append(dark, lit);
+  return svg;
+}
+function renderMoon() {
+  const now = new Date();
+  const { f, lit } = moonState(now);
+  const box = $("moon");
+  box.textContent = "";
+  const txt = document.createElement("div");
+  txt.className = "moon-text num";
+  const name = document.createElement("b");
+  name.textContent = moonName(f);
+  const line = document.createElement("span");
+  const fullDate = nextPhase(now, 0.5).toLocaleDateString([], { month: "short", day: "numeric" });
+  line.textContent = round(lit * 100) + "% lit  ·  next full moon about " + fullDate;
+  txt.append(name, line);
+  box.append(moonSvg(f), txt);
+}
+
 let lastGood = null;
 
 async function loadWeather() {
   const url = "https://api.open-meteo.com/v1/forecast" +
     "?latitude=" + LAT + "&longitude=" + LON +
     "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m" +
-    "&hourly=temperature_2m,precipitation_probability,weather_code,apparent_temperature,wind_gusts_10m" +
-    "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset" +
-    "&temperature_unit=fahrenheit&wind_speed_unit=mph" +
+    "&hourly=temperature_2m,precipitation_probability,precipitation,rain,showers,snowfall,weather_code,apparent_temperature,wind_gusts_10m" +
+    "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration" +
+    "&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch" +
     "&timezone=America%2FChicago&forecast_days=2";
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -401,22 +551,8 @@ function renderWeather(d) {
     strip.appendChild(el);
   });
 
-  // Rain timing over the next 12 hours.
-  const next12 = idx(12);
-  const wetI = next12.find((i) => d.hourly.precipitation_probability[i] >= 50);
-  const rain = $("rain");
-  if (wetI !== undefined) {
-    const c = d.hourly.weather_code[wetI];
-    const kind = isSnow(c) ? "Snow" : isIcy(c) ? "Freezing rain" : (d.hourly.temperature_2m[wetI] <= 32 ? "Snow or ice" : "Rain");
-    const when = new Date(d.hourly.time[wetI]);
-    const sameHour = wetI === i0;
-    rain.textContent = sameHour ? kind + " likely now" : kind + " likely around " + fmtHour(when);
-    rain.className = "rain-line";
-  } else {
-    const last = new Date(d.hourly.time[next12[next12.length - 1]]);
-    rain.textContent = "No rain or snow expected through " + fmtHour(last);
-    rain.className = "rain-line dry";
-  }
+  // Rain and snow: timing, chance and amounts over the next 24 hours.
+  renderPrecip(d, i0, idx);
 
   // Bike call, from the next 3 hours.
   const n3 = idx(3);
@@ -458,12 +594,27 @@ function renderWeather(d) {
     s.appendChild(b);
     return s;
   };
-  sun.append(mk("Sunrise", d.daily.sunrise[0]), mk("Sunset", d.daily.sunset[0]));
+  const dl = d.daily.daylight_duration;
+  const hm = (s) => { const m = Math.round(s / 60); return Math.floor(m / 60) + " h " + (m % 60) + " m"; };
+  const dayLen = document.createElement("span");
+  dayLen.append("Daylight ");
+  const bd = document.createElement("b");
+  bd.textContent = hm(dl[0]);
+  dayLen.appendChild(bd);
+  if (dl.length > 1) {
+    const diff = dl[1] - dl[0];
+    const ar = Math.round(Math.abs(diff));
+    dayLen.append("  (" + Math.floor(ar / 60) + " m " + (ar % 60) + " s " + (diff >= 0 ? "longer" : "shorter") + " tomorrow)");
+  }
+  sun.append(mk("Sunrise", d.daily.sunrise[0]), mk("Sunset", d.daily.sunset[0]), dayLen);
 }
 
 /* ---------------------------------------------------------------
    START
    --------------------------------------------------------------- */
+$("liveLink").href = TRACKER_URL;
+renderMoon();
+setInterval(renderMoon, 30 * 60 * 1000);
 if (EMBED_TRACKER) setupTracker();
 tickClock();
 setInterval(tickClock, 1000);
