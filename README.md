@@ -1,2 +1,2 @@
 # dashboard-x7k2
-Dashboard
+Dashboard visible at https://fizisist.github.io/dashboard-x7k2/
