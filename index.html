@@ -22,6 +22,8 @@
   --rain: #2b6cb0;
   --warn: #b4531a;
   --good: #2f7d4f;
+  --stop: #b3261e;
+  --on-stop: #ffffff;
   --board: #0e1b22;
   --board-ink: #ffc857;
   --board-dim: #8fa3ad;
@@ -33,14 +35,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0b1419; --panel: #142129; --ink: #e8eff3; --muted: #93a6b2; --line: #263944;
-    --accent: #4fb6d3; --rain: #7fb2ea; --warn: #f0a066; --good: #6cc48f;
+    --accent: #4fb6d3; --rain: #7fb2ea; --warn: #f0a066; --good: #6cc48f; --stop: #ff8a80; --on-stop: #2a0a08;
     --board: #070e12; --board-line: #1d2c34;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0b1419; --panel: #142129; --ink: #e8eff3; --muted: #93a6b2; --line: #263944;
-  --accent: #4fb6d3; --rain: #7fb2ea; --warn: #f0a066; --good: #6cc48f;
+  --accent: #4fb6d3; --rain: #7fb2ea; --warn: #f0a066; --good: #6cc48f; --stop: #ff8a80; --on-stop: #2a0a08;
   --board: #070e12; --board-line: #1d2c34;
   color-scheme: dark;
 }
@@ -52,7 +54,7 @@ body {
   color: var(--ink);
   font-family: var(--body);
   font-size: 18px;
-  padding-block: max(18px, env(safe-area-inset-top, 0px)) max(18px, env(safe-area-inset-bottom, 0px));
+  padding-block: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-bottom, 0px));
   padding-left: max(22px, env(safe-area-inset-left, 0px));
   padding-right: max(22px, env(safe-area-inset-right, 0px));
   -webkit-text-size-adjust: 100%;
@@ -72,44 +74,59 @@ body {
   grid-column: 1 / -1;
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
-.clock { font-family: var(--display); font-weight: 600; font-size: 68px; line-height: 0.95; letter-spacing: -0.5px; }
-.date { font-family: var(--display); font-weight: 500; font-size: 34px; color: var(--muted); }
+.clock { font-family: var(--display); font-weight: 600; font-size: 56px; line-height: 0.95; letter-spacing: -0.5px; }
+.date { font-family: var(--display); font-weight: 500; font-size: 30px; color: var(--muted); }
 
 /* Weather panel */
 .weather {
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-  padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; min-height: 0; min-width: 0;
+  padding: 12px 22px; display: flex; flex-direction: column; gap: 8px; min-height: 0; min-width: 0;
 }
 .now { display: flex; align-items: center; gap: 6px 24px; flex-wrap: wrap; }
-.temp { font-family: var(--display); font-weight: 600; font-size: 112px; line-height: 0.85; }
+.temp { font-family: var(--display); font-weight: 600; font-size: 88px; line-height: 0.85; display: flex; align-items: center; gap: 22px; }
 .temp small { font-size: 0.4em; vertical-align: top; font-weight: 500; color: var(--muted); }
+.temp .tc { font-size: 0.52em; color: var(--muted); padding-left: 22px; border-left: 3px solid var(--line); line-height: 1; }
 .cond { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.cond .what { font-family: var(--display); font-weight: 600; font-size: 42px; line-height: 1; }
-.cond .sub { color: var(--muted); font-size: 21px; }
-.facts { display: flex; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: 19px; }
+.cond .what { font-family: var(--display); font-weight: 600; font-size: 36px; line-height: 1; }
+.cond .sub { color: var(--muted); font-size: 19px; }
+.facts { display: flex; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: 18px; }
 .facts b { color: var(--ink); font-weight: 600; }
 
 .rain-line {
   border-left: 5px solid var(--rain); padding: 4px 0 4px 14px;
-  font-size: 24px; font-weight: 500;
+  font-size: 22px; font-weight: 500;
 }
 .rain-line.dry { border-left-color: var(--good); }
 
 .bike {
-  background: var(--bg); border-radius: 10px; padding: 10px 16px; display: grid; gap: 2px;
+  background: var(--bg); border-radius: 10px; padding: 8px 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 14px;
 }
 .bike .label { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.bike .call { font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1.05; }
+.bike .call { font-family: var(--display); font-weight: 600; font-size: 30px; line-height: 1.05; }
 .bike .call.ok { color: var(--good); }
 .bike .call.caution { color: var(--warn); }
-.bike .wear { font-size: 20px; color: var(--ink); }
+.bike .wear { font-size: 20px; color: var(--ink); flex-basis: 100%; }
+.bike.stop { background: var(--stop); }
+.bike.stop .label, .bike.stop .call, .bike.stop .wear { color: var(--on-stop); }
+.bike.stop .call { font-size: 38px; }
 
 .hours { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin-top: auto; }
-.hour { border-top: 3px solid var(--line); padding-top: 8px; display: grid; gap: 2px; text-align: center; }
+.hour { border-top: 3px solid var(--line); padding-top: 6px; display: grid; justify-items: center; gap: 1px; text-align: center; }
 .hour .h { color: var(--muted); font-size: 17px; font-weight: 500; }
-.hour .t { font-family: var(--display); font-weight: 600; font-size: 30px; line-height: 1; }
+.hour .ic { height: 34px; display: flex; align-items: center; }
+.wx { width: 34px; height: 34px; display: block; }
+.hour .t { font-family: var(--display); font-weight: 600; font-size: 28px; line-height: 1; }
+.hour .tc2 { font-family: var(--display); font-weight: 500; font-size: 20px; line-height: 1; color: var(--muted); }
 .hour .p { font-size: 17px; color: var(--rain); font-weight: 600; min-height: 1.2em; }
 .hour.wet { border-top-color: var(--rain); }
+.wx-sun { fill: #f2b01e; }
+.wx-ray { stroke: #f2b01e; stroke-width: 3; stroke-linecap: round; }
+.wx-cloud { fill: var(--muted); }
+.wx-moon { fill: var(--muted); }
+.wx-drop { stroke: var(--rain); stroke-width: 3; stroke-linecap: round; fill: none; }
+.wx-flake { fill: var(--rain); }
+.wx-bolt { fill: #f2b01e; }
+.wx-fog { stroke: var(--muted); stroke-width: 3; stroke-linecap: round; fill: none; }
 
 .sun { display: flex; gap: 22px; color: var(--muted); font-size: 18px; flex-wrap: wrap; }
 .sun b { color: var(--ink); font-weight: 600; }
@@ -145,10 +162,10 @@ body {
 .cal-label { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--board-dim); font-weight: 600; }
 .cal-frame { background: #ffffff; }
 .precip { display: grid; gap: 4px; }
-.rain-detail { border-left: 5px solid transparent; padding-left: 14px; color: var(--muted); font-size: 19px; min-height: 1.2em; }
+.rain-detail { border-left: 5px solid transparent; padding-left: 14px; color: var(--muted); font-size: 17px; min-height: 1.2em; }
 .sky { display: flex; align-items: center; gap: 12px 28px; flex-wrap: wrap; }
 .moon { display: flex; align-items: center; gap: 12px; }
-.moon svg { flex: none; }
+.moon svg { flex: none; width: 36px; height: 36px; }
 .moon-dark { fill: var(--board); stroke: var(--line); stroke-width: 1; }
 .moon-lit { fill: #f3e7b8; }
 .moon-text { display: grid; gap: 0; font-size: 17px; color: var(--muted); }
@@ -186,7 +203,7 @@ body {
       <div class="rain-detail num" id="rainDetail"></div>
     </div>
 
-    <div class="bike" aria-label="Bike commute">
+    <div class="bike" id="bike" aria-label="Bike commute">
       <div class="label">Bike to campus</div>
       <div class="call" id="bikeCall">--</div>
       <div class="wear" id="bikeWear"></div>
@@ -252,6 +269,78 @@ const $ = (id) => document.getElementById(id);
 const fmtTime = (d) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 const fmtHour = (d) => d.toLocaleTimeString([], { hour: "numeric" });
 const round = (x) => Math.round(x);
+
+// Temperatures arrive in Fahrenheit. Celsius is worked out here, so both always agree.
+const toC = (f) => (f - 32) * 5 / 9;
+const signed = (n) => (n < 0 ? "−" : "") + Math.abs(n); // true minus sign
+const fDeg = (f) => signed(round(f)) + "°F";
+const cDeg = (f) => signed(round(toC(f))) + "°C";
+const bothDeg = (f) => fDeg(f) + " / " + cDeg(f);
+function setBigTemp(el, f) {
+  el.textContent = "";
+  const a = document.createElement("span");
+  a.className = "tf";
+  a.append(signed(round(f)));
+  const ua = document.createElement("small");
+  ua.textContent = "°F";
+  a.appendChild(ua);
+  const b = document.createElement("span");
+  b.className = "tc";
+  b.append(signed(round(toC(f))));
+  const ub = document.createElement("small");
+  ub.textContent = "°C";
+  b.appendChild(ub);
+  el.append(a, b);
+}
+
+// Weather icons for the hourly strip, drawn as small SVGs. Codes follow the WMO list used by Open-Meteo.
+const CLOUD_D = "M14 36h20a8 8 0 0 0 1.2-15.9A11 11 0 0 0 14.4 22.4 7 7 0 0 0 14 36z";
+const MOON_D = "M30 11A14 14 0 1 0 37 30A11 11 0 0 1 30 11Z";
+function wxIcon(code, isDay) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 48 48");
+  svg.setAttribute("class", "wx");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", WEATHER[code] || "Weather");
+  const add = (tag, attrs) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e);
+    return e;
+  };
+  const sunAt = (cx, cy, r) => {
+    for (let a = 0; a < 8; a++) {
+      const t = a * Math.PI / 4, c = Math.cos(t), s = Math.sin(t);
+      add("line", { x1: cx + (r + 4) * c, y1: cy + (r + 4) * s, x2: cx + (r + 8) * c, y2: cy + (r + 8) * s, class: "wx-ray" });
+    }
+    add("circle", { cx, cy, r, class: "wx-sun" });
+  };
+  const moonAt = (x, y, k) => add("path", { d: MOON_D, class: "wx-moon", transform: "translate(" + x + " " + y + ") scale(" + k + ")" });
+  const cloudAt = (x, y) => add("path", { d: CLOUD_D, class: "wx-cloud", transform: "translate(" + x + " " + y + ")" });
+
+  if (code === 0 || code === 1) {
+    if (isDay) sunAt(24, 24, 9); else moonAt(0, 0, 1);
+  } else if (code === 2) {
+    if (isDay) sunAt(16, 16, 6); else moonAt(-4, -6, 0.75);
+    cloudAt(2, 6);
+  } else if (code === 3) {
+    cloudAt(0, 0);
+  } else if (code === 45 || code === 48) {
+    cloudAt(0, -7);
+    [34, 39, 44].forEach((y, i) => add("line", { x1: 12 + i * 2, y1: y, x2: 36 - i * 2, y2: y, class: "wx-fog" }));
+  } else if (isSnow(code)) {
+    cloudAt(0, -5);
+    [[17, 36], [25, 41], [33, 36]].forEach((p) => add("circle", { cx: p[0], cy: p[1], r: 2.6, class: "wx-flake" }));
+  } else if (code >= 95) {
+    cloudAt(0, -5);
+    add("path", { d: "M27 29 20 39h5l-3 8 10-12h-5z", class: "wx-bolt" });
+  } else {
+    cloudAt(0, -5); // drizzle, rain, showers
+    [[19, 34], [27, 34], [35, 34]].forEach((p) => add("line", { x1: p[0], y1: p[1], x2: p[0] - 3, y2: p[1] + 8, class: "wx-drop" }));
+  }
+  return svg;
+}
 
 const WEATHER = {
   0: "Clear", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -493,7 +582,7 @@ async function loadWeather() {
   const url = "https://api.open-meteo.com/v1/forecast" +
     "?latitude=" + LAT + "&longitude=" + LON +
     "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m" +
-    "&hourly=temperature_2m,precipitation_probability,precipitation,rain,showers,snowfall,weather_code,apparent_temperature,wind_gusts_10m" +
+    "&hourly=temperature_2m,precipitation_probability,precipitation,rain,showers,snowfall,weather_code,is_day,apparent_temperature,wind_gusts_10m" +
     "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration" +
     "&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch" +
     "&timezone=America%2FChicago&forecast_days=2";
@@ -522,10 +611,15 @@ function setStatus(text, isErr) {
 function renderWeather(d) {
   const cur = d.current;
   const code = cur.weather_code;
-  $("temp").innerHTML = round(cur.temperature_2m) + "<small>°F</small>";
+  setBigTemp($("temp"), cur.temperature_2m);
   $("what").textContent = WEATHER[code] || "Weather";
-  $("feels").textContent = "Feels like " + round(cur.apparent_temperature) + "°  ·  High " +
-    round(d.daily.temperature_2m_max[0]) + "°  ·  Low " + round(d.daily.temperature_2m_min[0]) + "°";
+  const feels = $("feels");
+  feels.textContent = "";
+  const fl1 = document.createElement("div");
+  fl1.textContent = "Feels like " + bothDeg(cur.apparent_temperature);
+  const fl2 = document.createElement("div");
+  fl2.textContent = "High " + bothDeg(d.daily.temperature_2m_max[0]) + "  ·  Low " + bothDeg(d.daily.temperature_2m_min[0]);
+  feels.append(fl1, fl2);
   const gust = round(cur.wind_gusts_10m);
   $("facts").innerHTML = "";
   const f1 = document.createElement("span");
@@ -552,9 +646,13 @@ function renderWeather(d) {
     const el = document.createElement("div");
     el.className = "hour" + (p >= 40 ? " wet" : "");
     const h = document.createElement("div"); h.className = "h"; h.textContent = k === 0 ? "Now" : fmtHour(when);
-    const t = document.createElement("div"); t.className = "t num"; t.textContent = round(d.hourly.temperature_2m[i]) + "°";
+    const ic = document.createElement("div"); ic.className = "ic";
+    const day = d.hourly.is_day ? d.hourly.is_day[i] === 1 : true;
+    ic.appendChild(wxIcon(d.hourly.weather_code[i], day));
+    const t = document.createElement("div"); t.className = "t num"; t.textContent = fDeg(d.hourly.temperature_2m[i]);
+    const tc = document.createElement("div"); tc.className = "tc2 num"; tc.textContent = cDeg(d.hourly.temperature_2m[i]);
     const pr = document.createElement("div"); pr.className = "p num"; pr.textContent = p >= 10 ? p + "%" : "";
-    el.append(h, t, pr);
+    el.append(h, ic, t, tc, pr);
     strip.appendChild(el);
   });
 
@@ -566,14 +664,28 @@ function renderWeather(d) {
   const maxP = Math.max(...n3.map((i) => d.hourly.precipitation_probability[i]));
   const maxGust = Math.max(...n3.map((i) => d.hourly.wind_gusts_10m[i]));
   const feel = cur.apparent_temperature;
-  const icy = n3.some((i) => isIcy(d.hourly.weather_code[i]) || (d.hourly.temperature_2m[i] <= 32 && d.hourly.precipitation_probability[i] >= 40));
+  const icy = n3.some((i) => isIcy(d.hourly.weather_code[i]));
   const call = $("bikeCall");
-  if (icy || feel <= 5 || maxGust >= 35) {
-    call.textContent = icy ? "Icy. Walk or take the train." : "Rough out there. Consider walking.";
+  const bikeBox = $("bike");
+  const sum3 = n3.reduce((s, i) => s + (d.hourly.precipitation[i] || 0), 0);
+  const snowish = n3.some((i) => isSnow(d.hourly.weather_code[i]) || (d.hourly.snowfall[i] || 0) >= 0.02);
+  const wetWord = snowish ? "Snow" : "Rain";
+  // "Don't bike" for ice, or a high chance of rain or snow that adds up to something real.
+  const stop = icy || (maxP >= 70 && sum3 >= 0.02);
+  const umbrella = !stop && maxP >= 40;
+  bikeBox.className = "bike" + (stop ? " stop" : "");
+  let wetNote = "";
+  if (stop) {
+    call.textContent = icy ? "Don't bike. Ice likely." : "Don't bike. " + wetWord + " likely.";
+    call.className = "call stop";
+    wetNote = "Chance " + maxP + "%. Take the train, or walk " + (icy ? "carefully on slick ground." : snowish ? "dressed for snow." : "with an umbrella.");
+  } else if (feel <= 5 || maxGust >= 35) {
+    call.textContent = "Rough out there. Consider walking.";
     call.className = "call caution";
-  } else if (maxP >= 50) {
-    call.textContent = "Bike with rain gear";
+  } else if (umbrella) {
+    call.textContent = "Bring an umbrella";
     call.className = "call caution";
+    wetNote = wetWord + " possible, " + maxP + "% chance. Rain gear if you bike. ";
   } else if (feel <= 25 || maxGust >= 25) {
     call.textContent = "Bike, bundled up";
     call.className = "call caution";
@@ -588,7 +700,14 @@ function renderWeather(d) {
   else if (feel >= 28) wear = "Winter jacket, warm gloves, ear cover.";
   else if (feel >= 15) wear = "Insulated layers, face cover, winter gloves.";
   else wear = "Full winter kit. Cover all skin.";
-  $("bikeWear").textContent = "Feels like " + round(feel) + "°. " + wear;
+  // A later spell of rain or snow still matters for the ride home.
+  const laterWet = idx(10).find((i) => !n3.includes(i) && (d.hourly.precipitation_probability[i] || 0) >= 60);
+  let later = "";
+  if (!stop && laterWet !== undefined) {
+    const lk = isSnow(d.hourly.weather_code[laterWet]) || (d.hourly.snowfall[laterWet] || 0) >= 0.02 ? "Snow" : "Rain";
+    later = " " + lk + " likely around " + fmtHour(new Date(d.hourly.time[laterWet])) + ", so plan the ride home.";
+  }
+  $("bikeWear").textContent = stop ? wetNote : wetNote + "Feels like " + bothDeg(feel) + ". " + wear + later;
 
   // Sunrise and sunset.
   const sun = $("sun");
